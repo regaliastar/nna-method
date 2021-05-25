@@ -33,10 +33,10 @@ def main():
     x[4, 4] = 1
 
     gates = [[0, 3], [1, 3], [3, 4], [0, 2], [2, 3], [0, 1]]
+    # for g in gates:
+    #     print(c3([k[0] for k in x.keys() if k[1] == g[0] and x[k] == 1], [k[0] for k in x.keys() if k[1] == g[1] and x[k] == 1]))
     for g in gates:
-        print(c3([k[0] for k in x.keys() if k[1] == g[0] and x[k] == 1], [k[0] for k in x.keys() if k[1] == g[1] and x[k] == 1]))
-
-    # print([k[0] for k in x.keys() if k[1] == g[0] and x[k] == 1])
+        print(sum([x[i, j] for j in range(g[0])]))
 
 if __name__ == '__main__':
     main()
