@@ -2,42 +2,41 @@ from ortools.linear_solver import pywraplp
 
 
 def main():
-    # Create the mip solver with the SCIP backend.
-    solver = pywraplp.Solver.CreateSolver('SCIP')
+       
+    def num2grid(num):
+        # 将一维距离转为坐标点
+        raw = 3 
+        j = num % raw
+        i = int(num/raw)
+        return [i, j]
+    def countDist(i, j):
+        # 曼哈顿距离
+        list_i = num2grid(i)
+        list_j = num2grid(j)
+        return abs(list_i[0]-list_j[0])+abs(list_i[1]-list_j[1])
+    def c3(l1, l2):
+        # 约束3
+        a = l1[0]
+        b = l2[0]
+        res = []
+        res.append(countDist(a, b))
+        return res
 
-    infinity = solver.infinity()
-    # x and y are integer non-negative variables.
-    x = solver.IntVar(0.0, infinity, 'x')
-    y = solver.IntVar(0.0, infinity, 'y')
+    x = {}
+    for i in range(9):
+        for j in range(5):
+            x[i, j] = 0
+    x[0, 0] = 1
+    x[1, 1] = 1
+    x[2, 2] = 1
+    x[3, 3] = 1
+    x[4, 4] = 1
 
-    print('Number of variables =', solver.NumVariables())
+    gates = [[0, 3], [1, 3], [3, 4], [0, 2], [2, 3], [0, 1]]
+    for g in gates:
+        print(c3([k[0] for k in x.keys() if k[1] == g[0] and x[k] == 1], [k[0] for k in x.keys() if k[1] == g[1] and x[k] == 1]))
 
-    # x + 7 * y <= 17.5.
-    solver.Add(x + 7 * y <= 17.5)
-
-    # x <= 3.5.
-    solver.Add(x <= 3.5)
-
-    print('Number of constraints =', solver.NumConstraints())
-
-    # Maximize x + 10 * y.
-    solver.Maximize(x + 10 * y)
-
-    status = solver.Solve()
-
-    if status == pywraplp.Solver.OPTIMAL:
-        print('Solution:')
-        print('Objective value =', solver.Objective().Value())
-        print('x =', x.solution_value())
-        print('y =', y.solution_value())
-    else:
-        print('The problem does not have an optimal solution.')
-
-    print('\nAdvanced usage:')
-    print('Problem solved in %f milliseconds' % solver.wall_time())
-    print('Problem solved in %d iterations' % solver.iterations())
-    print('Problem solved in %d branch-and-bound nodes' % solver.nodes())
-
+    # print([k[0] for k in x.keys() if k[1] == g[0] and x[k] == 1])
 
 if __name__ == '__main__':
     main()

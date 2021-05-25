@@ -4,42 +4,65 @@ from ortools.linear_solver import pywraplp
 grid[raw][col]
 qk: number of qubits
 """
-def MIP(raw, col, qk):
-    def distance(i, j):
-        """
-        将一维距离转为二维距离
-        曼哈顿距离
-        """
-        pass
+def MIP(raw, col, qk, gates):
+    def num2grid(num):
+        # 将一维距离转为坐标点
+        j = num % raw
+        i = int(num/raw)
+        return [i, j]
+    def countDist(i, j):
+        # 曼哈顿距离
+        list_i = num2grid(i)
+        list_j = num2grid(j)
+        return abs(list_i[0]-list_j[0])+abs(list_i[1]-list_j[1])
+    def c3(l1, l2):
+        # 约束3
+        a = l1[0]
+        b = l2[0]
+        res = []
+        res.append(countDist(a, b))
+        return res
 
+    
     # Create the mip solver with the SCIP backend.
     solver = pywraplp.Solver.CreateSolver('SCIP')
 
-    # x is integer non-negative variables from 0 to raw*col-1.
-    list_x = []
-    for i in range(qk):
-        list_x.append(solver.IntVar(0.0, raw*col-1, ''))
+    x = {}
+    num_grid = raw*col
+    num_qubit = qk
+    for i in range(num_grid):
+        for j in range(num_qubit):
+            x[i, j] = solver.IntVar(0, 1, '')
 
     print('Number of variables =', solver.NumVariables())
 
-    # 约束1，所有值都不相等
-    for i in range(len(list_x)-1):
-        solver.Add(list_x[i] != list_x[i+1])
-        pass
-    
-    # 约束2，门约束问题
+    # 约束1，每个qubit只有一个格子
+    for j in range(num_qubit):
+        solver.Add(solver.Sum([x[i, j] for i in range(num_grid)]) == 1)
+
+    # 约束2，每个格子只能分配一个qubit
+    for i in range(num_grid):
+        solver.Add(solver.Sum([x[i, j] for j in range(num_qubit)]) <= 1)
+
+    # 约束3，门约束
+    for g in gates:
+        # [k[0] for k in x.keys() if k[1] == g[0] and x[k] == 1], [k[0] for k in x.keys() if k[1] == g[1] and x[k] == 1]
+        solver.Add(solver.Sum(c3([k[0] for k in x.keys() if k[1] == g[0] and x[k] == 1], [k[0] for k in x.keys() if k[1] == g[1] and x[k] == 1])) == 1)
 
     print('Number of constraints =', solver.NumConstraints())
 
     status = solver.Solve()
 
-    if status == pywraplp.Solver.OPTIMAL:
-        print('Solution:')
-        print('Objective value =', solver.Objective().Value())
-        for x in list_x:
-            print(x.solution_value())
-    else:
-        print('The problem does not have an optimal solution.')
+    # Print solution.
+    if status == pywraplp.Solver.OPTIMAL or status == pywraplp.Solver.FEASIBLE:
+        # print('Total cost = ', solver.Objective().Value(), '\n')
+        for i in range(num_grid):
+            for j in range(num_qubit):
+                # Test if x[i,j] is 1 (with tolerance for floating point arithmetic).
+                if x[i, j].solution_value() > 0.5:
+                    [r, c] = num2grid(i)
+                    print('grid %d %d  qubit = %d' %
+                          (r, c, j))
 
     print('\nAdvanced usage:')
     print('Problem solved in %f milliseconds' % solver.wall_time())
@@ -48,4 +71,7 @@ def MIP(raw, col, qk):
 
 
 if __name__ == '__main__':
-    MIP(3, 3, 5)
+    # 量子门约束
+    # gates = [[0, 3], [1, 3], [3, 4], [0, 2], [2, 3], [0, 1]]
+    gates = [[0, 3], [1, 3], [3, 4], [0, 2]]
+    MIP(3, 3, 5, gates)
