@@ -1,4 +1,5 @@
 from ortools.linear_solver import pywraplp
+from ortools.sat.python import cp_model
 
 """
 grid[raw][col]
@@ -49,31 +50,25 @@ def CP(raw, col, qk, gates):
         # [k[0] for k in x.keys() if k[1] == g[0] and x[k] == 1], [k[0] for k in x.keys() if k[1] == g[1] and x[k] == 1] 对于x[i,j]==1，得到i的值
         # 若g=[0,3]，则取x[i1,0]中的i1，与x[i2,3]中的i2，计算i1与i2的曼哈顿距离
         # solver.Add(solver.Sum(c3([k[0] for k in x.keys() if k[1] == g[0] and x[k] == 1], [k[0] for k in x.keys() if k[1] == g[1] and x[k] == 1])) <= 1)
-        item1 = [0]*num_qubit
-        item2 = [0]*num_qubit
-        item1[g[0]] = 1
-        item2[g[1]] = 1
-        # solver.Sum([i * item1[j] * x[i, j] for j in range(num_qubit)])      i1
-        # solver.Sum([i * item2[j] * x[i, j] for j in range(num_qubit)])      i2
         for i in range(num_grid):
             # 若i=0，则相邻只能是1或3
             # 定义相邻矩阵
-            near = [0]*num_grid
+            near = []
             now_j = i % raw
             now_i = int(i/raw)
             if now_i > 0:
-                near[i-raw] = 1
+                near.append(i-raw)
             if now_i < raw-1:
-                near[i+raw] = 1
+                near.append(i+raw)
             if now_j > 0:
-                near[i-1] = 1
+                near.append(i-1)
             if now_j < col-1:
-                near[i+1] = 1
-            solver.Add(solver.Sum([x[i, j] for j in range(num_qubit)]))
-            # solver.Add(solver.Sum([i * item1[j] * x[i, j] for j in range(num_qubit)]) <= 2)
-            pass
+                near.append(i+1)
+            g0 = [g[0]]
+            g1 = [g[1]]
+            solver.Add(solver.Sum([x[p, j] for p in near for j in g1]+[1 + -1*x[i, g[0]]]) >= 1)
+            solver.Add(solver.Sum([x[p, j] for p in near for j in g0]+[1 + -1*x[i, g[1]]]) >= 1)
         
-
     print('Number of constraints =', solver.NumConstraints())
 
     status = solver.Solve()
@@ -93,6 +88,9 @@ def CP(raw, col, qk, gates):
     print('Problem solved in %f milliseconds' % solver.wall_time())
     print('Problem solved in %d iterations' % solver.iterations())
     print('Problem solved in %d branch-and-bound nodes' % solver.nodes())
+
+def CP_SAT(raw, col, qk, gates):
+    model = cp_model.CpModel()
 
 
 if __name__ == '__main__':
