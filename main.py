@@ -66,8 +66,8 @@ def CP(raw, col, qk, gates):
                 near.append(i+1)
             g0 = [g[0]]
             g1 = [g[1]]
-            solver.Add(solver.Sum([x[p, j] for p in near for j in g1]+[1 + -1*x[i, g[0]]]) >= 1)
-            solver.Add(solver.Sum([x[p, j] for p in near for j in g0]+[1 + -1*x[i, g[1]]]) >= 1)
+            solver.Add(solver.Sum([x[p, j] for p in near for j in g1]+[1-x[i, g[0]]]) >= 1)
+            solver.Add(solver.Sum([x[p, j] for p in near for j in g0]+[1-x[i, g[1]]]) >= 1)
         
     print('Number of constraints =', solver.NumConstraints())
 
