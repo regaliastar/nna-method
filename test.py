@@ -1,7 +1,7 @@
 from ortools.linear_solver import pywraplp
+import re
 
-
-def main():
+def test_CP():
        
     def num2grid(num):
         # 将一维距离转为坐标点
@@ -38,5 +38,18 @@ def main():
     for g in gates:
         print(sum([x[i, j] for j in range(g[0])]))
 
+def test_read_from_file():
+    numvars_pattern = r'numvars'
+    s1 = '.numvars 3'
+    s2 = '.variables a b c'
+    numvars1 = re.match(numvars_pattern, s1)
+    numvars2 = re.match(numvars_pattern, s2)
+    if('numvars' in s1):
+        print(1)
+    if('numvars' in s2):
+        print(2)
+    print(numvars1, numvars2)
+
 if __name__ == '__main__':
-    main()
+    # test_CP()
+    test_read_from_file()
