@@ -1,4 +1,4 @@
-## MIP4nna
+## nna-method
 量子拓扑结构优化算法
 
 ## methods

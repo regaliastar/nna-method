@@ -1,5 +1,7 @@
 from ortools.linear_solver import pywraplp
 import re
+from functools import reduce
+
 
 def test_CP():
        
@@ -50,6 +52,16 @@ def test_read_from_file():
         print(2)
     print(numvars1, numvars2)
 
+def test_decompose():
+    numvars = 5
+    gate = [0, 4, 2, 1]
+    candidate = list(set(range(numvars)).difference(gate))
+    dist = []
+    for c in candidate:
+        dist.append(reduce(lambda x,y: x+abs(y-c), gate)+abs(gate[0]-c))
+    print(candidate, dist)
+        
 if __name__ == '__main__':
     # test_CP()
-    test_read_from_file()
+    # test_read_from_file()
+    test_decompose()
