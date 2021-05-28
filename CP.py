@@ -1,12 +1,14 @@
-from ortools.linear_solver import pywraplp
-
 """
+约束规划(Constraint Programming, cp)
+
 grid[raw][col]
 qk: number of qubits
 
 @return: {status=int, placement=[]}
 @param status: 0:success, 2:fail
 """
+from ortools.linear_solver import pywraplp
+
 def CP(raw, col, qk, gates, next_gate):
     def num2grid(num):
         # 将一维距离转为坐标点
