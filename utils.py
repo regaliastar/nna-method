@@ -81,6 +81,24 @@ def decompose(qubit, gate, numvars):
         res += decompose(3, [gate[0], aux_bit, gate[1]], numvars)
         res += decompose(3, [gate[2], aux_bit, gate[3]], numvars)
         res += decompose(3, [gate[0], aux_bit, gate[1]], numvars)
+    elif qubit == 5:
+        # 这里需要利用辅助比特
+        # 求gate的差集，得到可用的辅助比特
+        candidate = list(set(range(numvars)).difference(gate))
+        dist = []
+        for c in candidate:
+            dist.append(reduce(lambda x,y: x+abs(y-c), gate)+abs(gate[0]-c))
+        min = 999999999
+        index = 0
+        for i in range(len(dist)):
+            if min > dist[i]:
+                min = dist[i]
+                index = i
+        aux_bit = candidate[index]
+        res += decompose(3, [gate[3], aux_bit, gate[4]], numvars)
+        res += decompose(4, [gate[0], gate[1], gate[2], aux_bit], numvars)
+        res += decompose(3, [gate[3], aux_bit, gate[4]], numvars)
+        res += decompose(4, [gate[0], gate[1], gate[2], aux_bit], numvars)
     else:
         raise ValueError('当前不支持量子门比特 '+str(qubit))
     return res
