@@ -1,7 +1,11 @@
+from os import path
 from ortools.linear_solver import pywraplp
 import re
 from functools import reduce
-
+from dag import DAG
+from utils import read_from_file
+from cp import CP
+import copy
 
 def test_CP():
        
@@ -60,8 +64,41 @@ def test_decompose():
     for c in candidate:
         dist.append(reduce(lambda x,y: x+abs(y-c), gate)+abs(gate[0]-c))
     print(candidate, dist)
-        
+
+def test_trace_back():
+    gates = [[0, 3], [1, 3], [3, 4], [0, 2], [2, 3]]
+    raw = 3
+    col = 3
+    numvars = 5
+    dag = DAG(gates, numvars)
+    res = []
+    path = []
+    def trace_back(dag, path):
+        if len(path) >= raw*col:
+            return
+        if len(path) > len(res):
+            res = copy.deepcopy(path)
+        print(path, len(path), len(res))
+        index = 0
+        for node in dag.current:
+            flag = False
+            for p in path:
+                if node.tag == p:
+                    flag = True
+                    break
+            if flag:
+                continue
+            path.append(node.tag)
+            dag_clone = copy.deepcopy(dag)
+            dag_clone.del_gate(dag_clone.current[index])
+            index += 1
+            trace_back(dag_clone, path)
+            path.pop()
+    trace_back(dag, path)
+    print('res', res)
+
 if __name__ == '__main__':
     # test_CP()
     # test_read_from_file()
-    test_decompose()
+    # test_decompose()
+    test_trace_back()

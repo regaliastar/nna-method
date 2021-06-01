@@ -9,7 +9,7 @@ qk: number of qubits
 """
 from ortools.linear_solver import pywraplp
 
-def CP(raw, col, qk, gates, next_gate):
+def CP(raw, col, qk, gates, next_gate=[]):
     def num2grid(num):
         # 将一维距离转为坐标点
         j = num % raw
@@ -80,7 +80,7 @@ def CP(raw, col, qk, gates, next_gate):
         solver.Minimize(solver.Sum(
             [n1 - n2]    
         ))
-        
+    
     # print('Number of constraints =', solver.NumConstraints())
 
     status = solver.Solve()
@@ -114,7 +114,7 @@ def CP(raw, col, qk, gates, next_gate):
 if __name__ == '__main__':
     # 量子门约束
     # gates = [[0, 3], [1, 3], [3, 4], [0, 2], [2, 3], [0, 1]]
-    gates = [[0, 3], [1, 3], [3, 4], [0, 2]]
-    next_gate = [2, 3]
+    gates = [[0, 3], [1, 3], [3, 4], [0, 2], [2, 3]]
+    next_gate = []
     res = CP(3, 3, 5, gates, next_gate)
     print(res)
