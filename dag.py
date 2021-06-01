@@ -31,7 +31,6 @@ class DAG:
     def add_gate(self, now, father):
         if now in father.next:
             return
-        # print(now.tag, father.tag, 'in add_gate')
         father.next.append(now)
         now.fathers.append(father)
     

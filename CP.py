@@ -1,5 +1,5 @@
 """
-约束规划(Constraint Programming, cp)
+约束规划(Constraint Programming, CP)
 
 grid[raw][col]
 qk: number of qubits

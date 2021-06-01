@@ -9,7 +9,9 @@ from functools import reduce
 def read_from_file(name):
     res = []
     if len(name) == 0:
-        return res
+        return {
+            'gates': []
+        }
     filename = 'benchmark/'+name+'.real'
     with open(filename, 'r') as f:
         list = f.readlines()
@@ -40,7 +42,10 @@ def read_from_file(name):
                         raise ValueError(name+' 解析门失败: '+'index: '+str(index)+' '+' '.join(line)+' '+name)
                 de_g = decompose(q_num, g, numvars)
                 res += de_g
-    return res
+    return {
+        'gates': res,
+        'numvars': numvars
+    }
 
 """
 @param qubit: 当前gate影响比特数量
@@ -50,7 +55,15 @@ def read_from_file(name):
 分解量子门算法
 [a,b,c] => [[b,c],[a,b],[b,c],[a,b],[a,c]], [[a,c],[a,b],[b,c],[a,b],[b,c]]
 
+n-qubit门与分解成的2-qubit门数量对应关系
+3 => 5
+4 => 14
+5 == 3+4+3+4 =>  
+
 referece:
+* Elementary quantum gate realizations for multiple-control Toffoli gates
+* Quantum Circuit Simplification and Level Compaction
+Lower Cost Quantum Gate Realizations of Multiple-control Toffoli Gates
 Multi-strategy based quantum cost reduction of linear nearest-neighbor quantum circuit
 """
 def decompose(qubit, gate, numvars):
@@ -77,10 +90,14 @@ def decompose(qubit, gate, numvars):
                 min = dist[i]
                 index = i
         aux_bit = candidate[index]
-        res += decompose(3, [gate[2], aux_bit, gate[3]], numvars)
-        res += decompose(3, [gate[0], aux_bit, gate[1]], numvars)
-        res += decompose(3, [gate[2], aux_bit, gate[3]], numvars)
-        res += decompose(3, [gate[0], aux_bit, gate[1]], numvars)
+        # res += decompose(3, [gate[2], aux_bit, gate[3]], numvars)
+        # res += decompose(3, [gate[0], aux_bit, gate[1]], numvars)
+        # res += decompose(3, [gate[2], aux_bit, gate[3]], numvars)
+        # res += decompose(3, [gate[0], aux_bit, gate[1]], numvars)
+        res = [[aux_bit,gate[3]],[gate[2],aux_bit],[aux_bit,gate[3]],
+                [gate[1],aux_bit],[gate[0],gate[1]],[gate[1],aux_bit],[gate[0],aux_bit],
+                [aux_bit,gate[3]],[gate[2],aux_bit],[aux_bit,gate[3]],
+                [gate[0],aux_bit],[gate[1],aux_bit],[gate[0],gate[1]],[gate[1],aux_bit]]
     elif qubit == 5:
         # 这里需要利用辅助比特
         # 求gate的差集，得到可用的辅助比特
@@ -109,5 +126,5 @@ if __name__ == '__main__':
         res = read_from_file(name)
         print('\n')
         print('文件 '+name+'\n')
-        print(res)
+        print(res.gates)
         print('\n')
