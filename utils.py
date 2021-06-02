@@ -120,11 +120,23 @@ def decompose(qubit, gate, numvars):
         raise ValueError('当前不支持量子门比特 '+str(qubit))
     return res
 
+"""
+Reference:
+Qubit placement to minimize communication overhead in 2D quantum architectures
+"""
+def benchmark_manager():
+    return {
+        '3_17_13': {'raw':2, 'col':2, 'ex':6},
+        '4_49_17': {'raw':2, 'col':2, 'ex':13},
+        '4gt10-v1_81': {'raw':3, 'col':2, 'ex':16},
+
+    }
+
 if __name__ == '__main__':
-    names = ['3_17_13', '4_49_17', '4gt10-v1_81']
-    for name in names:
+    # names = ['3_17_13', '4_49_17', '4gt10-v1_81']
+    test_names = ['3_17_13']
+    for name in test_names:
         res = read_from_file(name)
         print('\n')
         print('文件 '+name+'\n')
-        print(res.gates)
-        print('\n')
+        print(res['gates'])

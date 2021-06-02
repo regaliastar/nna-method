@@ -7,6 +7,7 @@ class DAG:
         self.current = []
         # 记录每一条导线最后的gate
         self.end = [-1]*numvars
+        self.defer_gates = []
         index = 1
         for gate in gates:
             tag = 'g'+str(index)
@@ -36,10 +37,28 @@ class DAG:
     
     def del_gate(self, node):
         if node not in self.current:
-            raise ValueError('del_gate必须在current内', node.tag)
+            raise ValueError('del_gate必须在dag.current内', node.tag)
         self.current.remove(node)
-        self.current += node.next
+        for n in node.next:
+            if n not in self.current:
+                self.current.append(n)
     
+    def get_current_node_by_tag(self, tag):
+        for node in self.current:
+            if node.tag == tag:
+                return node
+        return None
+
+    # 批量删除，若flag为True，则执行删除操作
+    def defer_del_gate(self, flag, node=None):
+        if not flag:
+            self.defer_gates.append(node)
+        else:
+            for node in self.defer_gates:
+                n = self.get_current_node_by_tag(node.tag)
+                self.del_gate(n)
+            self.defer_gates.clear()
+
     # dfs遍历
     def print(self, nodes):
         if nodes == None or len(nodes) == 0:
