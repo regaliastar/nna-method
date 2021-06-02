@@ -78,8 +78,7 @@ def get_dist(current_map, q1, q2):
 def init_map_process(raw, col, numvars, gates):
     dag = DAG(gates, numvars)
     def trace_back(dag, res, path):
-        # if len(path) > raw*col:
-        #     return
+        # print('init_map_process', raw, col, numvars, path)
         cp_res = CP(raw, col, numvars, path)
         if cp_res['status'] == 0:
             if len(path) > len(res):
@@ -132,12 +131,13 @@ def swap_process(raw, col, numvars, gates, init_map):
     return swap_path
 
 if __name__ == '__main__':
-    name = '3_17_13'
+    name = '4gt10-v1_81'
     benchmark = benchmark_manager()
-    res = read_from_file(name)
-    print('文件 '+name, '2-门数 '+str(len(res['gates'])), '\n')
-    placement = init_map_process(benchmark[name]['raw'], benchmark[name]['col'], res['numvars'], res['gates'])
+    file = read_from_file(name)
+    print('文件 '+name, '2-门数 '+str(len(file['gates'])), 'numvars',file['numvars'], '\n')
+    print(file['gates'])
+    placement = init_map_process(benchmark[name]['raw'], benchmark[name]['col'], file['numvars'], file['gates'])
     print('placement:')
     print(placement, '\n')
-    swap_path = swap_process(benchmark[name]['raw'], benchmark[name]['col'], res['numvars'], res['gates'], placement['placement'])
+    swap_path = swap_process(benchmark[name]['raw'], benchmark[name]['col'], file['numvars'], file['gates'], placement['placement'])
     print('总共插入交换门：', str(len(swap_path)))

@@ -12,8 +12,8 @@ from ortools.linear_solver import pywraplp
 def CP(raw, col, qk, gates, next_gate=[]):
     def num2grid(num):
         # 将一维距离转为坐标点
-        j = num % raw
-        i = int(num/raw)
+        j = num % col
+        i = int(num/col)
         return [i, j]
     def countDist(i, j):
         # 曼哈顿距离
@@ -56,12 +56,12 @@ def CP(raw, col, qk, gates, next_gate=[]):
             # 若i=0，则相邻只能是1或3
             # 定义相邻矩阵
             near = []
-            now_j = i % raw
-            now_i = int(i/raw)
+            now_j = i % col
+            now_i = int(i/col)
             if now_i > 0:
-                near.append(i-raw)
+                near.append(i-col)
             if now_i < raw-1:
-                near.append(i+raw)
+                near.append(i+col)
             if now_j > 0:
                 near.append(i-1)
             if now_j < col-1:
@@ -114,7 +114,7 @@ def CP(raw, col, qk, gates, next_gate=[]):
 if __name__ == '__main__':
     # 量子门约束
     # gates = [[0, 3], [1, 3], [3, 4], [0, 2], [2, 3], [0, 1]]
-    gates = [[0, 3], [1, 3], [3, 4], [0, 2], [2, 3]]
+    gates = [[3, 1], [2, 3]]
     next_gate = []
-    res = CP(3, 3, 5, gates, next_gate)
+    res = CP(3, 2, 5, gates, next_gate)
     print(res)

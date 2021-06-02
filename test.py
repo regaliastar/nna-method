@@ -9,6 +9,6 @@ if __name__ == '__main__':
         res = read_from_file(name)
         print('文件 '+name, '2-门数 '+str(len(res['gates'])), '\n')
         placement = init_map_process(benchmark[name]['raw'], benchmark[name]['col'], res['numvars'], res['gates'])
-        print('placement:', placement, '\n')
+        print('\n', 'placement:', placement, '\n')
         swap_path = swap_process(benchmark[name]['raw'], benchmark[name]['col'], res['numvars'], res['gates'], placement['placement'])
         print(name, '总共插入交换门：', str(len(swap_path)))
