@@ -8,6 +8,8 @@ from utils import benchmark_manager
 from cp import CP
 import copy
 from log import Log
+import sys  # 导入sys模块
+sys.setrecursionlimit(3000)  # 将默认的递归深度修改为3000
 
 logger = Log()
 
@@ -19,25 +21,34 @@ def get_min_score_swap(raw, col, current_map, current):
         'map': []
     }
     # print('get_min_score_swap', raw, col, current_map)
+    # logger.print_exec_list(current)
     for i in range(raw):
         for j in range(col):
             # 计算H
             if i+1 < raw:
                 # 交换(i,j) <=> (i+1,j)
                 # 更新map
-                now_map = current_map[:]
-                [k1, k2] = [-1, -1]
+                now_map = copy.deepcopy(current_map)
+                [k1, k2] = [None, None]
                 for k in range(len(now_map)): 
                     if now_map[k][0] == i and now_map[k][1] == j:
                         k1 = k
                     if now_map[k][0] == i+1 and now_map[k][1] == j:
                         k2 = k
-                t = now_map[k1][2]
-                now_map[k1][2] = now_map[k2][2]
-                now_map[k2][2] = t
+                if k1 != None and k2 != None:
+                    t = now_map[k1][2]
+                    now_map[k1][2] = now_map[k2][2]
+                    now_map[k2][2] = t
+                elif k1 == None and k2 != None:
+                    now_map[k2][0] = i
+                    now_map[k2][1] = j
+                elif k1 != None and k2 == None:
+                    now_map[k1][0] = i+1
+                    now_map[k1][1] = j
                 sum_dist = 0
                 for c in current:
                     dist = get_dist(now_map, c.value[0], c.value[1])
+                    # print(dist, now_map, c.value[0], c.value[1], k1, k2)
                     sum_dist += dist
                 if sum_dist < res['sum_dist']:
                     res['sum_dist'] = sum_dist
@@ -46,16 +57,23 @@ def get_min_score_swap(raw, col, current_map, current):
             if j+1 < col:
                 # 交换(i,j) <=> (i,j+1)
                 # 更新map
-                now_map = current_map[:]
-                [k1, k2] = [-1, -1]
+                now_map = copy.deepcopy(current_map)
+                [k1, k2] = [None, None]
                 for k in range(len(now_map)):
                     if now_map[k][0] == i and now_map[k][1] == j:
                         k1 = k
                     if now_map[k][0] == i and now_map[k][1] == j+1:
                         k2 = k
-                t = now_map[k1][2]
-                now_map[k1][2] = now_map[k2][2]
-                now_map[k2][2] = t
+                if k1 != None and k2 != None:
+                    t = now_map[k1][2]
+                    now_map[k1][2] = now_map[k2][2]
+                    now_map[k2][2] = t
+                elif k1 == None and k2 != None:
+                    now_map[k2][0] = i
+                    now_map[k2][1] = j
+                elif k1 != None and k2 == None:
+                    now_map[k1][0] = i
+                    now_map[k1][1] = j+1
                 sum_dist = 0
                 for c in current:
                     dist = get_dist(now_map, c.value[0], c.value[1])
@@ -65,6 +83,7 @@ def get_min_score_swap(raw, col, current_map, current):
                     res['sum_dist'] = sum_dist
                     res['swap'] = [[i,j], [i,j+1]]
                     res['map'] = copy.deepcopy(now_map)
+    # print('get_min_score_swap res:',res)
     return res
 
 # 根据当前map关系，得到两个qubit之间的曼哈顿距离
@@ -75,6 +94,8 @@ def get_dist(current_map, q1, q2):
             grid1 = c[:]
         if c[2] == q2:
             grid2 = c[:]
+    if len(grid1) == 0 or len(grid2) == 0:
+        raise ValueError('get_dist', grid1, grid2, q1, q2)
     return abs(grid1[0]-grid2[0])+abs(grid1[1]-grid2[1])
 
 # 初始映射算法，回溯法
@@ -116,7 +137,7 @@ def swap_process(raw, col, numvars, gates, init_map):
     # 相邻门列表
     exec_list = []
     dag = DAG(gates, numvars)
-    current_map = init_map[:]
+    current_map = copy.deepcopy(init_map)
     while len(dag.current) > 0:
         # dag.print_current()
         for node in dag.current:
@@ -131,12 +152,12 @@ def swap_process(raw, col, numvars, gates, init_map):
         else:
             # 启发式算法插入交换门
             res = get_min_score_swap(raw, col, current_map, dag.current)
-            current_map = res['map'][:]
+            current_map = copy.deepcopy(res['map'])
             swap_path.append(res['swap'])
     return swap_path
 
 if __name__ == '__main__':
-    name = '4gt10-v1_81'
+    name = '4gt13-v1_93'
     benchmark = benchmark_manager()
     file = read_from_file(name)
     print('文件 '+name, '2-门数 '+str(len(file['gates'])), 'numvars',file['numvars'], '\n')
@@ -147,3 +168,4 @@ if __name__ == '__main__':
     swap_path = swap_process(benchmark[name]['raw'], benchmark[name]['col'], file['numvars'], file['gates'], placement['placement'])
     print('总共插入交换门：', str(len(swap_path)))
     print(swap_path)
+    
