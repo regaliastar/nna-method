@@ -114,7 +114,7 @@ def CP(raw, col, qk, gates, next_gate=[]):
 if __name__ == '__main__':
     # 量子门约束
     # gates = [[0, 3], [1, 3], [3, 4], [0, 2], [2, 3], [0, 1]]
-    gates = [[3, 1], [2, 3]]
+    gates = [[3, 1], [2, 3], [3,1]]
     next_gate = []
     res = CP(3, 2, 5, gates, next_gate)
     print(res)

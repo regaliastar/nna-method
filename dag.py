@@ -17,15 +17,22 @@ class DAG:
                 self.current.append(node)
             elif self.end[node.value[0]] != -1 and self.end[node.value[1]] == -1:
                 father = self.end[node.value[0]]
+                node.refer += 1
                 self.add_gate(node, father)
             elif self.end[node.value[0]] == -1 and self.end[node.value[1]] != -1:
                 father = self.end[node.value[1]]
+                node.refer += 1
                 self.add_gate(node, father)
             elif self.end[node.value[0]] != -1 and self.end[node.value[1]] != -1:
                 father0 = self.end[node.value[0]]
                 father1 = self.end[node.value[1]]
-                self.add_gate(node, father0)
-                self.add_gate(node, father1)
+                if father0.tag == father1.tag:
+                    node.refer += 1
+                    self.add_gate(node, father0)
+                else:
+                    node.refer += 2
+                    self.add_gate(node, father0)
+                    self.add_gate(node, father1)
             self.end[node.value[0]] = node
             self.end[node.value[1]] = node
             
@@ -40,7 +47,8 @@ class DAG:
             raise ValueError('del_gate必须在dag.current内', node.tag)
         self.current.remove(node)
         for n in node.next:
-            if n not in self.current:
+            n.refer -= 1
+            if n not in self.current and n.refer == 0:
                 self.current.append(n)
     
     def get_current_node_by_tag(self, tag):
@@ -60,7 +68,7 @@ class DAG:
             self.defer_gates.clear()
 
     # dfs遍历
-    def print(self, nodes):
+    def print_all(self, nodes):
         if nodes == None or len(nodes) == 0:
             return
         for c in nodes:
@@ -69,6 +77,12 @@ class DAG:
                 c.visited = True
                 self.print(c.next)
 
+    def print_current(self):
+        tags = []
+        for node in self.current:
+            tags.append(node.tag)
+        print('print_current', tags)
+
 class Node:
     def __init__(self, value, tag=None) -> None:
         self.value = value
@@ -76,12 +90,15 @@ class Node:
         self.next = []
         self.fathers = []
         self.visited = False
+        self.refer = 0  # 入度，表示当前被引用数
 
 if __name__ == '__main__':
-    gates = [[0, 3], [1, 3], [3, 4], [0, 2], [2, 3], [0, 1]]
+    gates = [[3, 1], [2, 3], [3, 1], [4, 3], [0, 4], [4, 3], [0, 3]]
     dag = DAG(gates, 5)
-    print('dag.current[0]', dag.current[0].tag)
+    dag.print_current()
     dag.del_gate(dag.current[0])
-    print('dag.current[0]', dag.current[0].tag)
+    dag.print_current()
+    dag.del_gate(dag.current[0])
+    dag.print_current()
     print('-----------')
     dag.print(dag.current)

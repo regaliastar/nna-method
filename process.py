@@ -7,6 +7,9 @@ from utils import read_from_file
 from utils import benchmark_manager
 from cp import CP
 import copy
+from log import Log
+
+logger = Log()
 
 # swap门选择算法，复杂度O(raw*col)
 def get_min_score_swap(raw, col, current_map, current):
@@ -115,9 +118,11 @@ def swap_process(raw, col, numvars, gates, init_map):
     dag = DAG(gates, numvars)
     current_map = init_map[:]
     while len(dag.current) > 0:
+        # dag.print_current()
         for node in dag.current:
             if get_dist(current_map, node.value[0], node.value[1]) == 1:
                 exec_list.append(node)
+        # logger.print_exec_list(exec_list)
         if len(exec_list) > 0:
             for node in exec_list:
                 dag.defer_del_gate(False, node)
@@ -141,3 +146,4 @@ if __name__ == '__main__':
     print(placement, '\n')
     swap_path = swap_process(benchmark[name]['raw'], benchmark[name]['col'], file['numvars'], file['gates'], placement['placement'])
     print('总共插入交换门：', str(len(swap_path)))
+    print(swap_path)
