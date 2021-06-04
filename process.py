@@ -101,8 +101,9 @@ def get_dist(current_map, q1, q2):
 # 初始映射算法，回溯法
 def init_map_process(raw, col, numvars, gates):
     dag = DAG(gates, numvars)
+    # dag.print_current()
     def trace_back(dag, res, path):
-        # print('init_map_process', raw, col, numvars, path)
+        print('init_map_process', raw, col, numvars, path)
         cp_res = CP(raw, col, numvars, path)
         if cp_res['status'] == 0:
             if len(path) > len(res):
@@ -113,18 +114,20 @@ def init_map_process(raw, col, numvars, gates):
             return
         index = 0
         for node in dag.current:
-            flag = False
-            for p in path:
-                if node.value == p:
-                    flag = True
-            if flag:
-                continue
+            # 若和当前节点相同的门在path中，则continue ?
+            # flag = False
+            # for p in path:
+            #     if node.value == p:
+            #         flag = True
+            # if flag:
+            #     continue
             path.append(node.value)
             dag_clone = copy.deepcopy(dag)
             dag_clone.del_gate(dag_clone.current[index])
             index += 1
             trace_back(dag_clone, res, path)
             path.pop()
+        
     trace_back(dag, [], [])
     placement = CP(raw, col, numvars, outer_res, dag.current[0].value)
     placement['gates'] = outer_res
