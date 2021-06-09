@@ -3,6 +3,7 @@
 """
 class Log:
     def __init__(self) -> None:
+        self.env = 'debug'
         pass
 
     def print_exec_list(self, exec_list):
@@ -18,3 +19,22 @@ class Log:
         with open('logger.log', 'a') as f:
             f.write(msg+'\n')
             pass
+    
+    def set_env(self, env):
+        self.env = env
+
+    def print_current(self, current, context):
+        if self.env == 'debug':
+            info = {
+                'tags': [],
+                'gates': []
+            }
+            for node in current:
+                info['tags'].append(node.tag)
+                info['gates'].append(node.value)
+            print(context, 'print_current', info)
+
+    def print(self, *args):
+        if self.env == 'debug':
+            print(args)
+        

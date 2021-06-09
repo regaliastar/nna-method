@@ -8,20 +8,25 @@ from utils import benchmark_manager
 from cp import CP
 import copy
 from log import Log
-import sys  # 导入sys模块
+import random
+import sys
 sys.setrecursionlimit(3000)  # 将默认的递归深度修改为3000
 
 logger = Log()
+# logger.set_env('test')
 
 # swap门选择算法，复杂度O(raw*col)
 def get_min_score_swap(raw, col, current_map, current):
     res = {
         'sum_dist': 9999999999999999,
         'swap': [],
-        'map': []
+        'map': [],
+        'min_count': 1,  #存在多少个最优方法
+        'min_swap_list': [],
     }
+    min_count_list = []
     # print('get_min_score_swap', raw, col, current_map)
-    # logger.print_exec_list(current)
+    logger.print('-----get_min_score_swap start------')
     for i in range(raw):
         for j in range(col):
             # 计算H
@@ -50,10 +55,15 @@ def get_min_score_swap(raw, col, current_map, current):
                     dist = get_dist(now_map, c.value[0], c.value[1])
                     # print(dist, now_map, c.value[0], c.value[1], k1, k2)
                     sum_dist += dist
+                min_count_list.append(sum_dist)
+                if sum_dist == res['sum_dist']:
+                    res['min_swap_list'].append([[i,j], [i+1,j]])
                 if sum_dist < res['sum_dist']:
                     res['sum_dist'] = sum_dist
                     res['swap'] = [[i,j], [i+1,j]]
                     res['map'] = copy.deepcopy(now_map)
+                    res['min_swap_list'].clear()
+                    res['min_swap_list'].append([[i,j], [i+1,j]])
             if j+1 < col:
                 # 交换(i,j) <=> (i,j+1)
                 # 更新map
@@ -78,13 +88,29 @@ def get_min_score_swap(raw, col, current_map, current):
                 for c in current:
                     dist = get_dist(now_map, c.value[0], c.value[1])
                     sum_dist += dist
-                # print('j+1 get_min_score_swap', sum_dist, now_map)
+                min_count_list.append(sum_dist)
+                if sum_dist == res['sum_dist']:
+                    res['min_swap_list'].append([[i,j], [i,j+1]])
                 if sum_dist < res['sum_dist']:
                     res['sum_dist'] = sum_dist
                     res['swap'] = [[i,j], [i,j+1]]
                     res['map'] = copy.deepcopy(now_map)
-    # print('get_min_score_swap res:',res)
+                    res['min_swap_list'].clear()
+                    res['min_swap_list'].append([[i,j], [i,j+1]])
+    min_count_list.sort()
+    logger.print('min_count_list', min_count_list)
+    for i in range(len(min_count_list)):
+        if i == 0:
+            continue
+        if i > 0 and min_count_list[i] == min_count_list[i-1]:
+            res['min_count'] += 1
+        else:
+            break
+    logger.print('get_min_score_swap res:',res)
+    logger.print_current(current, 'get_min_score_swap')
+    logger.print('-----get_min_score_swap end------')
     return res
+
 
 # 根据当前map关系，得到两个qubit之间的曼哈顿距离
 def get_dist(current_map, q1, q2):
@@ -103,7 +129,7 @@ def init_map_process(raw, col, numvars, gates):
     dag = DAG(gates, numvars)
     # dag.print_current()
     def trace_back(dag, res, path):
-        print('init_map_process', raw, col, numvars, path)
+        logger.print('init_map_process', raw, col, numvars, path)
         cp_res = CP(raw, col, numvars, path)
         if cp_res['status'] == 0:
             if len(path) > len(res):
@@ -133,6 +159,8 @@ def init_map_process(raw, col, numvars, gates):
     placement['gates'] = outer_res
     return placement
 
+SWAP_NUMBER = 0
+
 # 插入swap算法
 def swap_process(raw, col, numvars, gates, init_map):
     # 插入交换门的信息
@@ -155,12 +183,30 @@ def swap_process(raw, col, numvars, gates, init_map):
         else:
             # 启发式算法插入交换门
             res = get_min_score_swap(raw, col, current_map, dag.current)
-            current_map = copy.deepcopy(res['map'])
+            first_map = res['map']
+            min_swap_list = res['min_swap_list']
+            current_num = len(dag.current)
+            MAXN = 10
+            while res['min_count'] > 1 and current_num < len(dag.current)+MAXN:
+                current_num += 1
+                current_more = dag.get_current_more(current_num)
+                res = get_min_score_swap(raw, col, current_map, current_more)
+                logger.print('current_num',current_num)
+                pass
+            # 若找不到最佳交换，则选择最初的交换
+            # 最佳交换必须是最初交换的其中之一
+            if current_num >= len(dag.current)+MAXN or res['swap'] not in min_swap_list:
+                current_map = copy.deepcopy(first_map)
+            else:
+                current_map = copy.deepcopy(res['map'])
             swap_path.append(res['swap'])
+            global SWAP_NUMBER
+            SWAP_NUMBER += 1
+            logger.print('已插入swap:', SWAP_NUMBER)
     return swap_path
 
 if __name__ == '__main__':
-    name = '4gt13-v1_93'
+    name = 'ham7_104'
     benchmark = benchmark_manager()
     file = read_from_file(name)
     print('文件 '+name, '2-门数 '+str(len(file['gates'])), 'numvars',file['numvars'], '\n')

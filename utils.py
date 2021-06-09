@@ -24,7 +24,7 @@ def read_from_file(name):
         }
         numvars = 0
         begin = False
-        prefix = ['t', 'p']
+        prefix = ['t', 'p', 'v']
         for item in list:
             if item[0] == '#':
                 pass
@@ -45,8 +45,12 @@ def read_from_file(name):
                 line = item.split(' ')
                 if line[0] == 'p':
                     q_num = len(line)-1
-                else:                
-                    q_num = int(line[0][1:])
+                else:
+                    s = line[0][1:]
+                    if s.isdigit():
+                        q_num = int(line[0][1:])
+                    else:
+                        q_num = len(line)-1
                 g = []
                 for index in range(len(line)):
                     if index == 0:

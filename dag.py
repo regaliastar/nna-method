@@ -57,6 +57,22 @@ class DAG:
                 return node
         return None
 
+    # 取num个node，若不足则广度优先搜索
+    def get_current_more(self, _num):
+        if len(self.current) >= _num:
+            return self.current[0:_num-1]
+        next = self.current[:]
+        num = _num - len(self.current)
+        MAXN = 10
+        while len(next) < MAXN and num > 0:
+            old_len = len(next)
+            for n in next:
+                next += n.next
+            if len(next) == old_len:
+                break
+            num -= len(next)-old_len
+        return next[0: _num]
+
     # 批量删除，若flag为True，则执行删除操作
     def defer_del_gate(self, flag, node=None):
         if not flag:
