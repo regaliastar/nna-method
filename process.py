@@ -13,7 +13,7 @@ import sys
 sys.setrecursionlimit(3000)  # 将默认的递归深度修改为3000
 
 logger = Log()
-# logger.set_env('test')
+logger.set_env('test')    # 若注释，则打印log
 
 # swap门选择算法，复杂度O(raw*col)
 def get_min_score_swap(raw, col, current_map, current):
@@ -27,6 +27,7 @@ def get_min_score_swap(raw, col, current_map, current):
     min_count_list = []
     # print('get_min_score_swap', raw, col, current_map)
     logger.print('-----get_min_score_swap start------')
+    logger.print_current(current, 'get_min_score_swap')
     for i in range(raw):
         for j in range(col):
             # 计算H
@@ -107,7 +108,6 @@ def get_min_score_swap(raw, col, current_map, current):
         else:
             break
     logger.print('get_min_score_swap res:',res)
-    logger.print_current(current, 'get_min_score_swap')
     logger.print('-----get_min_score_swap end------')
     return res
 

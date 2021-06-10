@@ -66,8 +66,10 @@ class DAG:
         MAXN = 10
         while len(next) < MAXN and num > 0:
             old_len = len(next)
+            _next = []
             for n in next:
-                next += n.next
+                _next += n.next
+            next += _next
             if len(next) == old_len:
                 break
             num -= len(next)-old_len

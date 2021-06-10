@@ -23,6 +23,7 @@ if __name__ == '__main__':
         improve[name] = (benchmark[name]['result'] - len(swap_path))/benchmark[name]['result']
     avg_imp = 0
     for imp in improve:
-        avg_imp += improve[name]
+        avg_imp += improve[imp]
+    print('improve', improve)
     print('平均improve', str(avg_imp/len(improve)))
     logger.log_in_file('平均improve', str(avg_imp/len(improve)))
