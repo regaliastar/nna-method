@@ -206,11 +206,11 @@ def swap_process(raw, col, numvars, gates, init_map):
     return swap_path
 
 if __name__ == '__main__':
-    name = 'ham7_104'
+    name = 'urf2_152'
     benchmark = benchmark_manager()
     file = read_from_file(name)
     print('文件 '+name, '2-门数 '+str(len(file['gates'])), 'numvars',file['numvars'], '\n')
-    print(file['gates'])
+    # print(file['gates'])
     placement = init_map_process(benchmark[name]['raw'], benchmark[name]['col'], file['numvars'], file['gates'])
     print('placement:')
     print(placement, '\n')

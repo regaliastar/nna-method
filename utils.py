@@ -177,7 +177,7 @@ def benchmark_manager():
         # 'sym9_148': {'raw':4, 'col':4, '2-gates': 4452, 'result':2363},
         'sys6-v0_144': {'raw':4, 'col':4, '2-gates': 62, 'result':31},
         # 'urf1_149': {'raw':3, 'col':3, '2-gates': 57770, 'result':38555},
-        # 'urf2_152': {'raw':4, 'col':2, '2-gates': 25150, 'result':16822},
+        'urf2_152': {'raw':4, 'col':2, '2-gates': 25150, 'result':16822},
         # 'urf5_158': {'raw':3, 'col':3, '2-gates': 51380, 'result':34406},
         # 'QFT5': {'raw':3, 'col':2, '2-gates': 10, 'result':5},
         # 'QFT6': {'raw':5, 'col':2, '2-gates': 15, 'result':6},

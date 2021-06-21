@@ -19,8 +19,8 @@ if __name__ == '__main__':
         placement = init_map_process(benchmark[name]['raw'], benchmark[name]['col'], res['numvars'], res['gates'])
         print('\n', 'placement:', placement, '\n')
         swap_path = swap_process(benchmark[name]['raw'], benchmark[name]['col'], res['numvars'], res['gates'], placement['placement'])
-        logger.log_in_file(name, '总共插入交换门：', str(len(swap_path)), '对照', benchmark[name]['result'])
         improve[name] = (benchmark[name]['result'] - len(swap_path))/benchmark[name]['result']
+        logger.log_in_file(name, '总共插入交换门：', benchmark[name]['result'], '对照',  str(len(swap_path)), improve[name])
     avg_imp = 0
     for imp in improve:
         avg_imp += improve[imp]
