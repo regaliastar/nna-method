@@ -10,7 +10,7 @@ import copy
 from log import Log
 import random
 import sys
-sys.setrecursionlimit(3000)  # 将默认的递归深度修改为3000
+sys.setrecursionlimit(1000)  # 将默认的递归深度修改为3000
 
 logger = Log()
 logger.set_env('test')    # 若注释，则打印log
@@ -131,7 +131,7 @@ def init_map_process(raw, col, numvars, gates):
     def trace_back(dag, res, path):
         logger.print('init_map_process', raw, col, numvars, path)
         cp_res = CP(raw, col, numvars, path)
-        if cp_res['status'] == 0:
+        if cp_res['status'] == 0 and len(path) <= raw*col:
             if len(path) > len(res):
                 res = copy.deepcopy(path)
                 global outer_res
@@ -149,6 +149,7 @@ def init_map_process(raw, col, numvars, gates):
             #     continue
             path.append(node.value)
             dag_clone = copy.deepcopy(dag)
+            dag_clone = dag
             dag_clone.del_gate(dag_clone.current[index])
             index += 1
             trace_back(dag_clone, res, path)
@@ -206,15 +207,18 @@ def swap_process(raw, col, numvars, gates, init_map):
     return swap_path
 
 if __name__ == '__main__':
-    name = 'urf2_152'
-    benchmark = benchmark_manager()
-    file = read_from_file(name)
-    print('文件 '+name, '2-门数 '+str(len(file['gates'])), 'numvars',file['numvars'], '\n')
-    # print(file['gates'])
-    placement = init_map_process(benchmark[name]['raw'], benchmark[name]['col'], file['numvars'], file['gates'])
-    print('placement:')
-    print(placement, '\n')
-    swap_path = swap_process(benchmark[name]['raw'], benchmark[name]['col'], file['numvars'], file['gates'], placement['placement'])
-    print('总共插入交换门：', str(len(swap_path)))
-    print(swap_path)
+    # name = 'rd53_135'
+    # benchmark = benchmark_manager()
+    # file = read_from_file(name)
+    # print('文件 '+name, '2-门数 '+str(len(file['gates'])), 'numvars',file['numvars'], '\n')
+    # placement = init_map_process(benchmark[name]['raw'], benchmark[name]['col'], file['numvars'], file['gates'])
+    # print('placement:')
+    # print(placement, '\n')
+    # swap_path = swap_process(benchmark[name]['raw'], benchmark[name]['col'], file['numvars'], file['gates'], placement['placement'])
+    # print('总共插入交换门：', str(len(swap_path)))
+
+    # paper
+    gates = [[0,3],[1,3],[3,4],[0,2],[2,3],[0,1],[2,4]]
+    placement = init_map_process(3, 2, 5, gates)
+    print('placement:', placement)
     
